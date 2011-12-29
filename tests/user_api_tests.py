@@ -2,7 +2,7 @@ import unittest
 import sys
 import os
 from mongoengine import connect
-import CONFIG
+import config #include mongolab configuration details; not included in repo for security reasons
 
 class UserAPITestCase(unittest.TestCase):
 	
