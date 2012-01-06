@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, current_app, request, session
-from flask.views import MethodView
+from flask.views import View, MethodView
 #import app from one directory up
 import sys
 import os
@@ -29,6 +29,27 @@ class UserAPI(MethodView):
 
 user_api.add_url_rule('/<unicode:user_id>/', methods=['GET', 'POST', 'DELETE'])
 
+class LoginView(View, template=None):
+	'''A generic login view'''
+
+	def __init__(self, template):
+		'''specify a template when constructing the view'''
+		self.template = template
+
+	def dispatch_request(self):
+		error_message = None
+		try:
+			user = Users.objects(username=request.form['username'])
+		except:
+			error_message = 'an error'
+		if user.authenticated(request.form['password']): 
+			#user is authenticated
+			pass
+		else:
+			#user is NOT authenticated
+			pass
+
+
 def login_required(view_function, failure_template='login_failure.html', *args, **kwargs):
 	'''implements a login_required decorator that takes a login failure template as an argument
 	(and provides a default template) which is returned if the user is not in flask.session'''
@@ -38,15 +59,4 @@ def login_required(view_function, failure_template='login_failure.html', *args, 
 		return render_template(failure_template)
 
 
-def login():
-	error_message = None
-	try:
-		user = Users.objects(username=request.form['username'])
-	except:
-		error_message = 'an error'
-	if user.authenticated(request.form['password']): 
-		#user is authenticated
-		pass
-	else:
-		#user is NOT authenticated
-		pass
+
