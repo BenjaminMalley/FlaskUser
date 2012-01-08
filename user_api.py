@@ -44,7 +44,8 @@ class UserAPI(MethodView):
 				user.active = False
 			return 'OK'
 			
-	def put(self, 
+	def put(self):
+		pass
 
 
 user_api.add_url_rule('/<unicode:user_id>/', methods=['GET', 'POST', 'DELETE'])
