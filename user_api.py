@@ -27,11 +27,25 @@ class UserAPI(MethodView):
 		if user_id==None:
 			pass
 		else:
+			pass
+			
+	def login(self):
+		error_message = None
+		try:
+			user = Users.objects(username=request.form['username'])
+		except:
+			error_message = 'an error'
+		if user.authenticate(request.form['password']): 
+			#user is authenticated
+			pass
+		else:
+			#user is NOT authenticated
 			with User(id=user_id) as user:
 				user.active = False
 			return 'OK'
 			
 	def put(self, 
+
 
 user_api.add_url_rule('/<unicode:user_id>/', methods=['GET', 'POST', 'DELETE'])
 
@@ -72,4 +86,5 @@ def username_is_unique(username):
 		return True
 	else:
 		return False
+
 
