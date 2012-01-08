@@ -52,6 +52,10 @@ class UserAPITestCase(unittest.TestCase):
 			password='bad_password'))
 		assert 'error' in rv.data
 
+	def test_user_logout(self):
+		self.app.add_url_rule('/logout/', view_func=LogoutView.as_view('logout'))
+		rv = self.test_client.get('/logout/')
+		assert 'logged out' in rv.data
 
 			
 if __name__=='__main__':
