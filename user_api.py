@@ -26,6 +26,20 @@ class UserAPI(MethodView):
 			pass
 		else:
 			pass
+			
+	def login(self):
+		error_message = None
+		try:
+			user = Users.objects(username=request.form['username'])
+		except:
+			error_message = 'an error'
+		if user.authenticate(request.form['password']): 
+			#user is authenticated
+			pass
+		else:
+			#user is NOT authenticated
+			pass
+
 
 user_api.add_url_rule('/<unicode:user_id>/', methods=['GET', 'POST', 'DELETE'])
 
@@ -38,15 +52,3 @@ def login_required(view_function, failure_template='login_failure.html', *args, 
 		return render_template(failure_template)
 
 
-def login():
-	error_message = None
-	try:
-		user = Users.objects(username=request.form['username'])
-	except:
-		error_message = 'an error'
-	if user.authenticated(request.form['password']): 
-		#user is authenticated
-		pass
-	else:
-		#user is NOT authenticated
-		pass

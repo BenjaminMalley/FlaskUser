@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, DateTimeField, EmbeddedDocument, EmbeddedDocumentField, ListField, GeoPointField, BooleanField, EmailField, connect
+from mongoengine import * 
 from datetime import datetime
 from contextlib import contextmanager
 #we need to set some global flags for requiring/not requiring fields so we can allow for reuse
@@ -32,10 +32,10 @@ class Login(EmbeddedDocument, ContextManagerMixin):
 	
 class Password(EmbeddedDocument, ContextManagerMixin):
 	hash = StringField()
-	salt = StringField()
+	salt = BinaryField()
 	
 class User(Document, ContextManagerMixin):
-	username = StringField() #what should I name this?
+	username = StringField()
 	#using a list of passwords allows us to check against old passwords at password change
 	passwords = ListField(EmbeddedDocumentField(Password), required=False)
 	first_name = StringField(required=FULL_NAME_REQUIRED)
@@ -53,7 +53,7 @@ class User(Document, ContextManagerMixin):
 		else:
 			return p
 	
-	def authenticated(self, attempt):
+	def authenticate(self, attempt):
 		password = self.passwords[-1]
 		if self._get_hash(attempt, password.salt) == password.hash:
 			return True
@@ -65,13 +65,11 @@ class User(Document, ContextManagerMixin):
 		salt = os.urandom(16)
 		self.passwords.append(Password(hash=self._get_hash(password, salt), salt=salt))
 	
-		
+	def __repr__(self):
+		return self.username
+	
 if __name__=='__main__':
-		connect('test')
-		with User().transaction() as user:
-			user.username='ben'
-
-		print user.username
+	pass
 	
 	
 	
