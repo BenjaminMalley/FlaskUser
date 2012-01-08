@@ -5,3 +5,4 @@ lib/*
 Scripts/
 tests/config.py
 build/*
+*.swp
