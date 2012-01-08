@@ -50,7 +50,7 @@ class User(Document, ContextManagerMixin):
 		else:
 			return p
 	
-	def authenticate(self, attempt):
+	def authenticated(self, attempt):
 		password = self.passwords[-1]
 		if self._get_hash(attempt, password.salt) == password.hash:
 			return True
@@ -59,7 +59,7 @@ class User(Document, ContextManagerMixin):
 			
 	def set_password(self, password):
 		import os
-		salt = str(os.urandom(16))
+		salt = os.urandom(16)
 		self.passwords.append(Password(hash=self._get_hash(password, salt), salt=salt))
 	
 	def __repr__(self):

@@ -1,11 +1,15 @@
 from flask import Blueprint, render_template, current_app, request, session
 from flask.views import View, MethodView
 #import app from one directory up
-import sys
-import os
-sys.path.append(os.path.abspath('..'))
-from app import db
 from models import User, Login
+
+def login_required(view_function, failure_template='login_failure.html', *args, **kwargs):
+	'''implements a login_required decorator that takes a login failure template as an argument
+	(and provides a default template) which is returned if the user is not in flask.session'''
+	if 'username' in session:
+		return view_function(*args, **kwargs)
+	else:
+		return render_template(failure_template)
 
 class UserAPI(MethodView):
 	
@@ -22,7 +26,7 @@ class UserAPI(MethodView):
 			return 'OK'
 		return 'error'
 	
-	@login_required
+	#@login_required
 	def delete(self, user_id=None):
 		if user_id==None:
 			pass
@@ -37,18 +41,15 @@ class UserAPI(MethodView):
 			error_message = 'an error'
 		if user.authenticate(request.form['password']): 
 			#user is authenticated
-			pass
+			return 'authenticated'
 		else:
 			#user is NOT authenticated
 			with User(id=user_id) as user:
 				user.active = False
-			return 'OK'
+			return 'not authenticated'
 			
 	def put(self):
 		pass
-
-
-user_api.add_url_rule('/<unicode:user_id>/', methods=['GET', 'POST', 'DELETE'])
 
 class LoginView(View):
 	'''A generic login view'''
@@ -58,29 +59,23 @@ class LoginView(View):
 		self.template = template
 
 	def dispatch_request(self):
-		error_message = None
-		try:
-			with Users.objects(username=request.form['username']) as user:
-				if user.authenticated(request.form['password']) and user.active: 
-					#user is authenticated
-					user.logins.append(Login())
-				else:
-					#user is NOT authenticated
-					error_message = 'authentication error'
-		except:
-			error_message = 'an error'
-		if error_message == None:
-			return render_template(self.template)
-		else:
-			return error_message
+		with User.objects(username=request.form['username'])[0] as user:
+			if user.authenticated(str(request.form['password'])) and user.active:
+				#user is authenticated
+				user.logins.append(Login())
+				session['username'] = request.form['username']
+				return 'authenticated'
+			else:
+				#user is NOT authenticated
+				return 'authentication error'
 
-def login_required(view_function, failure_template='login_failure.html', *args, **kwargs):
-	'''implements a login_required decorator that takes a login failure template as an argument
-	(and provides a default template) which is returned if the user is not in flask.session'''
-	if 'username' in session:
-		return view_function(*args, **kwargs)
-	else:
-		return render_template(failure_template)
+class LogoutView(View):
+	def __init__(self, template=None):
+		self.template = template
+
+	def dispatch_request(self):
+		session.pop('username', None)
+		return 'user logged out'
 
 def username_is_unique(username):
 	if User.objects(username=username) == None:
