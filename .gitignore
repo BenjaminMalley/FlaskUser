@@ -4,3 +4,4 @@ lib/*
 *.pyc
 Scripts/
 tests/config.py
+build/*

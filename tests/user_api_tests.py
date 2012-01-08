@@ -5,6 +5,7 @@ from mongoengine import connect
 import config #include mongolab configuration details; not included in repo for security reasons
 sys.path.append(os.path.abspath('..'))
 from models import User
+from flask import Flask
 
 class UserAPITestCase(unittest.TestCase):
 
@@ -18,7 +19,7 @@ class UserAPITestCase(unittest.TestCase):
 		super(UserAPITestCase, self).__init__(*args, **kwargs)
 	
 	def setUp(self):
-		pass
+		self.app = Flask(__name__).test_client()
 	
 	def tearDown(self):
 		pass
@@ -36,6 +37,9 @@ class UserAPITestCase(unittest.TestCase):
 			assert user.authenticate('test_password') == True
 			# and a bad one doesn't
 			assert user.authenticate('bad_password') == False
+
+	def test_login(self):
+		pass 
 			
 if __name__=='__main__':
 	unittest.main()

@@ -13,10 +13,7 @@ class ContextManagerMixin():
 		return self
 		
 	def __exit__(self, *args):
-		try:
-			self.save()
-		except ValidationError:
-			return True
+		self.save()
 
 	@contextmanager
 	def transaction(self):
@@ -62,7 +59,7 @@ class User(Document, ContextManagerMixin):
 			
 	def set_password(self, password):
 		import os
-		salt = os.urandom(16)
+		salt = str(os.urandom(16))
 		self.passwords.append(Password(hash=self._get_hash(password, salt), salt=salt))
 	
 		
