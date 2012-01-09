@@ -40,7 +40,6 @@ class UserAPITestCase(unittest.TestCase):
 		# and a bad one doesn't
 		assert user.authenticated('bad_password') == False
 
-
 	def test_user_login(self):
 		self.app.add_url_rule('/login/', view_func=LoginView.as_view('login'), methods=['POST',])
 		rv = self.test_client.post('/login/', data=dict(
