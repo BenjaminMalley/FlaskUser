@@ -31,7 +31,13 @@ class UserAPI(MethodView):
 		if user_id==None:
 			pass
 		else:
-			pass
+			with User.objects(id=user_id) as user:
+				if user.username in session.keys():
+					user.active = False
+					#redirect
+				else:
+					#bad request
+					pass
 			
 	def login(self):
 		error_message = None
