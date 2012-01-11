@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app, request, session
+from flask import Blueprint, render_template, current_app, request, session, url_for, redirect
 from flask.views import View, MethodView
 #import app from one directory up
 from models import User, Login
@@ -15,7 +15,7 @@ class UserAPI(MethodView):
 	
 	def get(self, user_id=None):
 		if user_id==None:
-			pass
+			return 'OK'
 		else:
 			pass
 
@@ -29,30 +29,17 @@ class UserAPI(MethodView):
 	#@login_required
 	def delete(self, user_id=None):
 		if user_id==None:
-			pass
+			return 'bad request'
 		else:
-			with User.objects(id=user_id) as user:
-				if user.username in session.keys():
+			with User.objects(id=user_id)[0] as user:
+				if session['username'] == user.username:
 					user.active = False
-					#redirect
+					#redirect to logout
+					return url_for('logout')
 				else:
 					#bad request
-					pass
+					return 'bad request'
 			
-	def login(self):
-		error_message = None
-		try:
-			user = Users.objects(username=request.form['username'])
-		except:
-			error_message = 'an error'
-		if user.authenticate(request.form['password']): 
-			#user is authenticated
-			return 'authenticated'
-		else:
-			#user is NOT authenticated
-			with User(id=user_id) as user:
-				user.active = False
-			return 'not authenticated'
 			
 	def put(self):
 		pass
@@ -81,7 +68,7 @@ class LogoutView(View):
 
 	def dispatch_request(self):
 		session.pop('username', None)
-		return 'user logged out'
+		return redirect(url_for('index'))
 
 def username_is_unique(username):
 	if User.objects(username=username) == None:
