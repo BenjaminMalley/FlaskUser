@@ -1,11 +1,8 @@
 import unittest
-import sys
-import os
 from mongoengine import connect
 from flask import Flask, session
 import config #include mongolab configuration details; not included in repo for security reasons
-sys.path.append(os.path.abspath('..'))
-from user_api import *
+from ..user_api.user_api import *
 
 class UserAPITestCase(unittest.TestCase):
 
@@ -95,5 +92,3 @@ class UserAPITestCase(unittest.TestCase):
 		rv = self.test_client.get('/logout/', follow_redirects=True)
 		assert 'OK' in rv.data
 
-if __name__=='__main__':
-	unittest.main()
