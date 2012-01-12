@@ -34,13 +34,12 @@ class UserAPI(MethodView):
 			return 'bad request'
 		else:
 			with User.objects(id=user_id)[0] as user:
-				if session['username'] == user.username:
-					user.active = False
-					#redirect to logout
-					return url_for('logout')
-				else:
-					#bad request
+				try:
+					assert session['username'] == user.username
+				except KeyError, AssertionError:
 					return 'bad request'
+				user.active = False
+				return url_for('logout')
 			
 			
 	def put(self):
@@ -49,6 +48,8 @@ class UserAPI(MethodView):
 class LoginAPI(MethodView):
 	'''LoginAPI accepts GET and POST methods.  On GET, this method returns the login form.
 	On POST, it authenticates the user and redirects to last visited page.
+
+	LoginAPI also supplies a logout method
 	
 	A generic template supplied for the login form but is meant to be overridden on initialization.'''
 
@@ -72,11 +73,8 @@ class LoginAPI(MethodView):
 	def get(self):
 		return render_template(template)
 
-class LogoutView(View):
-	def __init__(self, template=None):
-		self.template = template
-
-	def dispatch_request(self):
+	@classmethod
+	def logout(self):
 		session.pop('username', None)
 		return redirect(url_for('index'))
 

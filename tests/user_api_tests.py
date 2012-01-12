@@ -23,7 +23,7 @@ class UserAPITestCase(unittest.TestCase):
 		self.app.secret_key = 'test_key'
 		#add an index rule because some views redirect to index
 		self.app.add_url_rule('/', view_func=UserAPI.as_view('index'), methods=['GET', 'POST'])
-		self.app.add_url_rule('/logout/', view_func=LogoutView.as_view('logout'))
+		self.app.add_url_rule('/logout/', view_func=LoginAPI.logout)
 		self.app.add_url_rule('/login/', view_func=LoginAPI.as_view('login'),
 			methods=['GET', 'POST'])
 		self.app.add_url_rule('/delete/<user_id>/', view_func=UserAPI.as_view('user_api'),
@@ -66,8 +66,13 @@ class UserAPITestCase(unittest.TestCase):
 		self.delete_user()
 	
 	def test_UserAPI_delete(self):
+		'''test setting a user to inactive through UserAPI.
+		ensures that deletion only works when user is logged in.'''
 		user = self.add_user()
 		with self.app.test_client() as c:
+			#first check when user isn't logged in
+			rv = c.delete('/delete/{0}/'.format(user.id))
+			assert User.objects(username='test_user')[0].active == True
 			with c.session_transaction() as sess:
 				sess['username'] = 'test_user'
 			rv = c.delete('/delete/{0}/'.format(user.id))
@@ -75,9 +80,15 @@ class UserAPITestCase(unittest.TestCase):
 		self.delete_user()
 
 	def test_LoginAPI_post(self):
-		self.add_user()
+		user = self.add_user()
+		#good password works
 		assert 'OK' in self.login('test_password').data
+		#bad password doesn't
 		assert 'error' in self.login('bad_password').data
+		user.active = False
+		user.save()
+		#inactive users can't log in
+		assert 'error' in self.login('test_password').data
 		self.delete_user()
 
 	def test_user_logout(self):
