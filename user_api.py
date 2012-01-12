@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, current_app, request, session, url
 from flask.views import View, MethodView
 #import app from one directory up
 from models import User, Login
+from redirect import redirect_back
 
 def login_required(view_function, failure_template='login_failure.html', *args, **kwargs):
 	'''implements a login_required decorator that takes a login failure template as an argument
@@ -45,22 +46,28 @@ class UserAPI(MethodView):
 		pass
 
 class LoginView(View):
-	'''A generic login view'''
+	'''A login view tha accepts GET and POST methods.  On GET, this method returns the login form.
+	On POST, it authenticates the user and redirects to last visited page.
+	
+	A generic template supplied for the login form but is meant to be overridden on initialization.'''
 
 	def __init__(self, template=None):
 		'''specify a template when constructing the view'''
 		self.template = template
 
-	def dispatch_request(self):
-		with User.objects(username=request.form['username'])[0] as user:
-			if user.authenticated(str(request.form['password'])) and user.active:
-				#user is authenticated
-				user.logins.append(Login())
-				session['username'] = request.form['username']
-				return 'authenticated'
-			else:
-				#user is NOT authenticated
-				return 'authentication error'
+	def dispatch_request(self, methods=['GET', 'POST']):
+		if request.method == 'POST':
+			with User.objects(username=request.form['username'])[0] as user:
+				if user.authenticated(str(request.form['password'])) and user.active:
+					#user is authenticated
+					user.logins.append(Login())
+					session['username'] = request.form['username']
+					return 
+				else:
+					#user is NOT authenticated
+					return redirect_back('index')
+		#TODO: 
+		return render_template(template)
 
 class LogoutView(View):
 	def __init__(self, template=None):
