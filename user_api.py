@@ -15,10 +15,11 @@ def login_required(view_function, failure_template='login_failure.html', *args, 
 class UserAPI(MethodView):
 	
 	def get(self, user_id=None):
-		if user_id==None:
-			return 'OK'
-		else:
-			pass
+		return 'OK'
+		#if user_id==None:
+		#	return 'OK'
+		#else:
+		#	pass
 
 	def post(self):
 		if username_is_unique(request.form['username']):
@@ -45,8 +46,8 @@ class UserAPI(MethodView):
 	def put(self):
 		pass
 
-class LoginView(View):
-	'''A login view tha accepts GET and POST methods.  On GET, this method returns the login form.
+class LoginAPI(MethodView):
+	'''LoginAPI accepts GET and POST methods.  On GET, this method returns the login form.
 	On POST, it authenticates the user and redirects to last visited page.
 	
 	A generic template supplied for the login form but is meant to be overridden on initialization.'''
@@ -55,18 +56,20 @@ class LoginView(View):
 		'''specify a template when constructing the view'''
 		self.template = template
 
-	def dispatch_request(self, methods=['GET', 'POST']):
-		if request.method == 'POST':
-			with User.objects(username=request.form['username'])[0] as user:
-				if user.authenticated(str(request.form['password'])) and user.active:
-					#user is authenticated
-					user.logins.append(Login())
-					session['username'] = request.form['username']
-					return 
-				else:
-					#user is NOT authenticated
-					return redirect_back('index')
-		#TODO: 
+	def post(self):
+		with User.objects(username=request.form['username'])[0] as user:
+			if user.authenticated(str(request.form['password'])) and user.active:
+				#user is authenticated
+				user.logins.append(Login())
+				session['username'] = request.form['username']
+				#redirect user back to referring page, falling back to index
+				
+				return redirect_back('index')
+			else:
+				#flash an error message
+				return 'error' 
+	
+	def get(self):
 		return render_template(template)
 
 class LogoutView(View):

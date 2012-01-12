@@ -9,7 +9,10 @@ def is_safe_url(target_url):
 def redirect_back(endpoint, **kwargs):
 	if endpoint==None:
 		endpoint = 'index'
-	target = request.form['next']
+	try:
+		target = request.form['next']
+	except KeyError:
+		target = None
 	if not target or not is_safe_url(target):
 		target = url_for(endpoint, **kwargs)
 	return redirect(target)
