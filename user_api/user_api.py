@@ -49,7 +49,7 @@ class LoginAPI(MethodView):
 	'''LoginAPI accepts GET and POST methods.  On GET, this method returns the login form.
 	On POST, it authenticates the user and redirects to last visited page.
 
-	LoginAPI also supplies a logout method
+	LoginAPI also supplies a logout method as a classmethod.  This will probably change.
 	
 	A generic template supplied for the login form but is meant to be overridden on initialization.'''
 
