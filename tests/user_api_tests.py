@@ -51,7 +51,12 @@ class UserAPITestCase(unittest.TestCase):
 		self.app = Flask(__name__)
 		self.app.secret_key = 'test_key'
 		#add an index rule because some views redirect to index
-		self.app.add_url_rule('/', view_func=UserAPI.as_view('index'), methods=['GET', 'POST'])
+		self.app.add_url_rule('/',
+			view_func=TestView.as_view('index', template='index.html'),
+			methods=['GET', 'POST'])
+		self.app.add_url_rule('/restricted/',
+			view_func=RestrictedView.as_view('restricted', template='index.html'),
+			methods=['GET'])
 		self.app.add_url_rule('/logout/', view_func=LoginAPI.logout)
 		self.app.add_url_rule('/login/', view_func=LoginAPI.as_view('login'),
 			methods=['GET', 'POST'])
@@ -102,3 +107,6 @@ class UserAPITestCase(unittest.TestCase):
 		rv = self.test_client.get('/logout/', follow_redirects=True)
 		assert 'OK' in rv.data
 
+	def test_restricted_view(self):
+		rv = self.test_client.get('/restricted/', follow_redirects=True)
+		assert 'not logged in' in rv.data

@@ -55,6 +55,8 @@ class LoginAPI(MethodView):
 
 	def __init__(self, template=None):
 		'''specify a template when constructing the view'''
+		if template == None:
+			template = 'index.html'
 		self.template = template
 
 	def post(self):
@@ -77,6 +79,22 @@ class LoginAPI(MethodView):
 	def logout(self):
 		session.pop('username', None)
 		return redirect(url_for('index'))
+
+class TestView(View):
+	'''a generic view; useful for tests'''
+
+	def __init__(self, template=None):
+		if template == None:
+			template = 'index.html'
+		self.template = template
+	
+	def dispatch_request(self):
+		#return 'OK'
+		return render_template(self.template)
+
+class RestrictedView(TestView):
+	'''has login_required decorator'''
+	decorators = [login_required]
 
 def username_is_unique(username):
 	if User.objects(username=username) == None:
